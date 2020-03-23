@@ -6,11 +6,17 @@ public class LoginResponse {
 
     private User currentUser;
 
-    public LoginResponse(User currentUser){
+    private String auth;
+
+    public LoginResponse(User currentUser, String auth){
         this.currentUser = currentUser;
+        this.auth = auth;
     }
 
     public User getCurrentUser(){
         return currentUser;
+    }
+    public String getAuth(){
+        return auth;
     }
 }

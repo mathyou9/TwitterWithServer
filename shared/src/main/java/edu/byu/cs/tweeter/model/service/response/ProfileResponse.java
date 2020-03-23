@@ -19,7 +19,8 @@ public class ProfileResponse {
         return selectedUser;
     }
 
-    public boolean isFound() {
+    public boolean getIsFound() {
         return isFound;
     }
+
 }

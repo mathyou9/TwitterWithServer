@@ -9,12 +9,14 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
 import edu.byu.cs.tweeter.R;
+import edu.byu.cs.tweeter.client.view.main.Feed.FeedFragment;
+import edu.byu.cs.tweeter.client.view.main.Story.StoryFragment;
 import edu.byu.cs.tweeter.client.view.main.followers.FollowersFragment;
 import edu.byu.cs.tweeter.client.view.main.following.FollowingFragment;
 
 /**
- * A [FragmentPagerAdapter] that returns a fragment corresponding to one of the sections/tabs/pages
- * of the Main Activity.
+ * A [FragmentPagerAdapter] that returns a fragment corresponding to
+ * one of the sections/tabs/pages.
  */
 class SectionsPagerAdapter extends FragmentPagerAdapter {
 
@@ -34,9 +36,13 @@ class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        if (position == FOLLOWING_FRAGMENT_POSITION) {
+        if (position == FEED_FRAGMENT_POSITION){
+            return new FeedFragment();
+        } else if (position == FOLLOWING_FRAGMENT_POSITION) {
             return new FollowingFragment();
-        } else if(position == FOLLOWER_FRAGMENT_POSITION){
+        } else if(position == STORY_FRAGMENT_POSITION) {
+            return new StoryFragment();
+        } else if(position == FOLLOWER_FRAGMENT_POSITION) {
             return new FollowersFragment();
         } else {
             return PlaceholderFragment.newInstance(position + 1);

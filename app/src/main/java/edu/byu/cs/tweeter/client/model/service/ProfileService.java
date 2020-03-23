@@ -11,7 +11,7 @@ import edu.byu.cs.tweeter.model.service.response.SearchResponse;
 
 public class ProfileService {
 
-    private static final String URL_PATH = "/getProfile";
+    private static final String URL_PATH = "/getprofile";
 
     private static ProfileService instance;
 
@@ -32,7 +32,7 @@ public class ProfileService {
 
     public ProfileResponse getProfileResponse(ProfileRequest request) throws IOException {
         ProfileResponse profileResponse = serverFacade.getUserProfile(request, URL_PATH);
-        setSelectedUser(profileResponse.getSelectedUser());
+        this.setSelectedUser(profileResponse.getSelectedUser());
         return profileResponse;
     }
     public User getSelectedUser(){

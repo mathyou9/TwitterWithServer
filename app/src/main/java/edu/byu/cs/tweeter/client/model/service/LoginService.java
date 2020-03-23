@@ -1,6 +1,11 @@
 package edu.byu.cs.tweeter.client.model.service;
 
+import java.io.IOException;
+
+import edu.byu.cs.tweeter.client.net.ServerFacade;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.service.request.LoginRequest;
+import edu.byu.cs.tweeter.model.service.response.LoginResponse;
 
 /**
  * Contains the business logic for login and sign up.
@@ -12,6 +17,8 @@ public class LoginService {
      */
     private static LoginService instance;
 
+
+    private static final String URL_PATH = "/login";
     /**
      * The logged in user.
      */
@@ -22,6 +29,9 @@ public class LoginService {
      *
      * @return the instance.
      */
+
+    private final ServerFacade serverFacade;
+
     public static LoginService getInstance() {
         if(instance == null) {
             instance = new LoginService();
@@ -39,6 +49,7 @@ public class LoginService {
         currentUser = new User("Test", "User",
                 "https://faculty.cs.byu.edu/~jwilkerson/cs340/tweeter/images/donald_duck.png");
         setCurrentUser(currentUser);
+        serverFacade = new ServerFacade();
     }
 
     /**
@@ -50,7 +61,13 @@ public class LoginService {
         return currentUser;
     }
 
-    private void setCurrentUser(User currentUser) {
+    public void setCurrentUser(User currentUser) {
         this.currentUser = currentUser;
+    }
+
+    public LoginResponse login(LoginRequest request) throws IOException {
+        LoginResponse loginResponse = serverFacade.login(request, URL_PATH);
+        currentUser = loginResponse.getCurrentUser();
+        return  loginResponse;
     }
 }

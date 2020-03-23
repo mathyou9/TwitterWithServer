@@ -2,7 +2,7 @@ package edu.byu.cs.tweeter.client.model.service;
 
 import java.io.IOException;
 
-import edu.byu.cs.tweeter.model.service.FollowingService;
+import edu.byu.cs.tweeter.model.service.IFollowingService;
 import edu.byu.cs.tweeter.model.service.request.AddFollowRequest;
 import edu.byu.cs.tweeter.model.service.request.FindFollowerRequest;
 import edu.byu.cs.tweeter.model.service.request.FollowingRequest;
@@ -16,23 +16,23 @@ import edu.byu.cs.tweeter.model.service.response.RemoveResponse;
 /**
  * A remote-access proxy for accessing the 'following' service.
  */
-public class FollowingServiceProxy {
+public class IFollowingServiceProxy implements IFollowingService {
 
     private static final String URL_PATH = "/getfollowing";
 
     private final ServerFacade serverFacade;
 
-    private static FollowingServiceProxy instance;
+    private static IFollowingServiceProxy instance;
 
-    public static FollowingServiceProxy getInstance() {
+    public static IFollowingServiceProxy getInstance() {
         if(instance == null) {
-            instance = new FollowingServiceProxy();
+            instance = new IFollowingServiceProxy();
         }
 
         return instance;
     }
 
-    private FollowingServiceProxy() {
+    private IFollowingServiceProxy() {
         serverFacade = new ServerFacade();
     }
 
@@ -42,12 +42,12 @@ public class FollowingServiceProxy {
     }
 
     public RemoveResponse removeFollowee(RemoveRequest request) throws IOException {
-        return serverFacade.removeFollowee(request, "/removeFollowee");
+        return serverFacade.removeFollowee(request, "/removefollowee");
     }
     public FindFollowerResponse isFollowing(FindFollowerRequest request) throws IOException {
-        return serverFacade.FindFollower(request, "/isFollowing");
+        return serverFacade.FindFollower(request, "/isfollowing");
     }
     public AddFollowResponse addFollowee(AddFollowRequest request) throws IOException {
-        return serverFacade.AddFollowee(request, "addFollowee");
+        return serverFacade.AddFollowee(request, "/addfollowee");
     }
 }

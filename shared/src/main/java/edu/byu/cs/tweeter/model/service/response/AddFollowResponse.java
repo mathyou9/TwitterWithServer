@@ -6,7 +6,7 @@ public class AddFollowResponse {
         this.didAdd = didAdd;
     }
 
-    public boolean isDidAdd() {
+    public boolean getDidAdd() {
         return didAdd;
     }
 }

@@ -20,13 +20,16 @@ import com.google.android.material.tabs.TabLayout;
 import java.io.IOException;
 
 import edu.byu.cs.tweeter.R;
-import edu.byu.cs.tweeter.client.model.service.FollowingServiceProxy;
+import edu.byu.cs.tweeter.client.model.service.IFollowingServiceProxy;
+import edu.byu.cs.tweeter.client.net.ServerFacade;
 import edu.byu.cs.tweeter.client.presenter.ProfilePresenter;
+import edu.byu.cs.tweeter.client.view.asyncTasks.AddFolloweeTask;
 import edu.byu.cs.tweeter.client.view.asyncTasks.LoadImageTask;
+import edu.byu.cs.tweeter.client.view.asyncTasks.ProfileTask;
+import edu.byu.cs.tweeter.client.view.asyncTasks.RemoveTask;
 import edu.byu.cs.tweeter.client.view.asyncTasks.SearchTask;
 import edu.byu.cs.tweeter.client.view.cache.ImageCache;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.service.FollowingService;
 import edu.byu.cs.tweeter.model.service.request.AddFollowRequest;
 import edu.byu.cs.tweeter.model.service.request.FindFollowerRequest;
 import edu.byu.cs.tweeter.model.service.request.ProfileRequest;
@@ -55,24 +58,27 @@ public class ProfileActivity extends AppCompatActivity implements LoadImageTask.
         final TabLayout tabs = findViewById(R.id.tabs);
         tabs.setupWithViewPager(viewPager);
         final Button followButton = findViewById(R.id.followButton);
-
         userImageView = findViewById(R.id.userImage);
 
+        TextView userName = findViewById(R.id.userName);
+//
+        TextView userAlias = findViewById(R.id.userAlias);
+
         String alias = getIntent().getStringExtra("userAlias");
-//        ProfileTask profileTask = new ProfileTask(presenter);
-//        profileTask.execute(new ProfileRequest(alias));
-        try {
-            ProfileResponse response = presenter.getUserProfile(new ProfileRequest(alias));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ProfileTask profileTask = new ProfileTask(presenter, this, userName, userAlias, followButton);
+        profileTask.execute(new ProfileRequest(alias));
+//        try {
+//            ProfileResponse response = presenter.getUserProfile(new ProfileRequest(alias));
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         user = presenter.getUserProfile();
 //        ViewGroup view1 = (ViewGroup) tabs.getChildAt(0);
         final View tab = ((ViewGroup) tabs.getChildAt(0)).getChildAt(0);
         final View tab2 = ((ViewGroup) tabs.getChildAt(0)).getChildAt(1);
         FindFollowerRequest request = new FindFollowerRequest(presenter.getCurrentUser(), presenter.getUserProfile());
         try {
-            if(FollowingServiceProxy.getInstance().isFollowing(request).isFound()){
+            if(IFollowingServiceProxy.getInstance().isFollowing(request).isFound()){
                 followButton.setText("Unfollow");
             } else {
                 followButton.setText("Follow");
@@ -85,30 +91,39 @@ public class ProfileActivity extends AppCompatActivity implements LoadImageTask.
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if(presenter.getCurrentUser().getAlias().equals(presenter.getUserProfile().getAlias())){
-            followButton.setEnabled(false);
-        }
+//        if(presenter.getCurrentUser().getAlias().equals(presenter.getUserProfile().getAlias())){
+//            followButton.setEnabled(false);
+//        }
         followButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(followButton.getText().equals("Unfollow")){
                     followButton.setText("Follow");
                     RemoveRequest request = new RemoveRequest(presenter.getUserProfile(), presenter.getCurrentUser());
-                    try {
-                        FollowingServiceProxy.getInstance().removeFollowee(request);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    RemoveTask removeTask = new RemoveTask(presenter, ProfileActivity.this);
+                    removeTask.execute(request);
+//                    try {
+//                        presenter.removeFollowee();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                    try {
+//                        IFollowingServiceProxy.getInstance().removeFollowee(request);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
                     tab.setEnabled(false);
                     tab2.setEnabled(false);
                 } else {
                     followButton.setText("Unfollow");
                     AddFollowRequest request = new AddFollowRequest(presenter.getCurrentUser(), presenter.getUserProfile());
-                    try {
-                        FollowingServiceProxy.getInstance().addFollowee(request);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    AddFolloweeTask addFolloweeTask = new AddFolloweeTask(presenter, ProfileActivity.this);
+                    addFolloweeTask.execute(request);
+//                    try {
+//                        IFollowingServiceProxy.getInstance().addFollowee(request);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
 //                    tabs.getChildAt(0).setEnabled(true);
 //                    tabs.getChildAt(1).setEnabled(true);
                     tab.setEnabled(true);
@@ -117,14 +132,14 @@ public class ProfileActivity extends AppCompatActivity implements LoadImageTask.
             }
         });
 
-        LoadImageTask loadImageTask = new LoadImageTask(this);
-        loadImageTask.execute(user.getImageUrl());
+//        LoadImageTask loadImageTask = new LoadImageTask(this);
+//        loadImageTask.execute(user.getImageUrl());
 
-        TextView userName = findViewById(R.id.userName);
-        userName.setText(user.getName());
-
-        TextView userAlias = findViewById(R.id.userAlias);
-        userAlias.setText(user.getAlias());
+//        TextView userName = findViewById(R.id.userName);
+//        userName.setText(user.getName());
+//
+//        TextView userAlias = findViewById(R.id.userAlias);
+//        userAlias.setText(user.getAlias());
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Toolbar toolbar = findViewById(R.id.toolbar);

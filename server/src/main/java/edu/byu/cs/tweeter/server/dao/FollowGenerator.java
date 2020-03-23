@@ -64,6 +64,11 @@ public class FollowGenerator {
         return generateFollowsForUsers(users, minFollowersPerUser, maxFollowersPerUser, sortOrder);
     }
 
+    public List<User> generateFollowers(int amtFollowers){
+        List<User> users = UserGenerator.getInstance().generateUsers(amtFollowers);
+        return users;
+    }
+
     /**
      * Randomly Generates {@link Follow} objects from the specified list of users. Ensures that each
      * {@link User} has between 'minFollowersPerUser' and 'maxFollowersPerUser'. Makes no guarantees
@@ -87,7 +92,7 @@ public class FollowGenerator {
         }
 
         assert minFollowersPerUser >= 0 : minFollowersPerUser;
-        assert maxFollowersPerUser < users.size() : maxFollowersPerUser;
+//        assert maxFollowersPerUser < users.size() : maxFollowersPerUser;
 
         // For each user, generate a random number of followers between the specified min and max
         Random random = new Random();

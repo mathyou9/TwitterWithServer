@@ -4,10 +4,12 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class FollowersRequest {
 
-    private final User follower;
-    private final int limit;
-    private final User lastFollower;
+    private User follower;
+    private int limit;
+    private User lastFollower;
+    private String auth;
 
+    private FollowersRequest(){}
     public FollowersRequest(User follower, int limit, User lastFollower){
         this.follower = follower;
         this.limit = limit;
@@ -26,4 +28,22 @@ public class FollowersRequest {
         return lastFollower;
     }
 
+    public void setFollower(User follower) {
+        this.follower = follower;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
+
+    public void setLastFollower(User lastFollower) {
+        this.lastFollower = lastFollower;
+    }
+
+    public void setAuth(String auth){
+        this.auth = auth;
+    }
+    public String getAuth(){
+        return auth;
+    }
 }

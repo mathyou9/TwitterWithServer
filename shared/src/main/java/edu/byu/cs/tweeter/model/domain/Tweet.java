@@ -5,21 +5,37 @@ import java.time.format.DateTimeFormatter;
 
 public class Tweet {
     String message;
-    User created;
+    User userCreated;
     String imageUrl;
-    LocalDateTime date;
+    String date;
 
-    public Tweet(User created, String message, LocalDateTime date){
+    public Tweet(){}
+    public Tweet(User userCreated, String message, String date){
         this.message = message;
-        this.created = created;
+        this.userCreated = userCreated;
         this.date = date;
     }
     public String getMessage() {return message;}
     public String getImageUrl() {return imageUrl;}
-    public User getUserCreated() {return created;}
+    public User getUserCreated() {return userCreated;}
 
     public String getDate() {
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("hh:mm a ' - ' dd MMM YYYY");
-        return date.format(dateFormatter).toString();
+        return this.date;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setUserCreated(User userCreated) {
+        this.userCreated = userCreated;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 }

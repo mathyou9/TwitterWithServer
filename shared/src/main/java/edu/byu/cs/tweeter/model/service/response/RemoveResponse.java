@@ -6,7 +6,7 @@ public class RemoveResponse {
         this.didRemove = didRemove;
     }
 
-    public boolean isDidRemove() {
+    public boolean getDidRemove() {
         return didRemove;
     }
 }

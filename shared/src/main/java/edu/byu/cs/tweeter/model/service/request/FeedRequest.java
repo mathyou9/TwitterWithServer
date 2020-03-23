@@ -5,10 +5,12 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class FeedRequest {
 
-    private final User user;
-    private final int limit;
-    private final Tweet lastTweet;
+    private User user;
+    private int limit;
+    private Tweet lastTweet;
+    private String auth;
 
+    public FeedRequest(){}
     public FeedRequest(User user, int limit, Tweet lastTweet){
         this.user = user;
         this.limit = limit;
@@ -25,4 +27,22 @@ public class FeedRequest {
         return lastTweet;
     }
 
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
+
+    public void setLastTweet(Tweet lastTweet) {
+        this.lastTweet = lastTweet;
+    }
+
+    public void setAuth(String auth){
+        this.auth = auth;
+    }
+    public String getAuth(){
+        return auth;
+    }
 }

@@ -2,9 +2,8 @@ package edu.byu.cs.tweeter.client.presenter;
 
 import java.io.IOException;
 
-import edu.byu.cs.tweeter.model.service.FollowingService;
 import edu.byu.cs.tweeter.model.service.request.FollowingRequest;
-import edu.byu.cs.tweeter.client.model.service.FollowingServiceProxy;
+import edu.byu.cs.tweeter.client.model.service.IFollowingServiceProxy;
 import edu.byu.cs.tweeter.model.service.response.FollowingResponse;
 
 /**
@@ -39,7 +38,7 @@ public class FollowingPresenter extends Presenter {
      * @return the followees.
      */
     public FollowingResponse getFollowing(FollowingRequest request) throws IOException {
-        FollowingServiceProxy service = FollowingServiceProxy.getInstance();
+        IFollowingServiceProxy service = IFollowingServiceProxy.getInstance();
         return service.getFollowees(request);
     }
 }

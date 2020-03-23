@@ -12,6 +12,8 @@ public class FollowingRequest {
     private int limit;
     private User lastFollowee;
 
+    private String auth;
+
     /**
      * Allows construction of the object from Json. Private so it won't be called in normal code.
      */
@@ -85,5 +87,12 @@ public class FollowingRequest {
      */
     public void setLastFollowee(User lastFollowee) {
         this.lastFollowee = lastFollowee;
+    }
+
+    public void setAuth(String auth){
+        this.auth = auth;
+    }
+    public String getAuth(){
+        return auth;
     }
 }
