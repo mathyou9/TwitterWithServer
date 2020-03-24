@@ -13,7 +13,7 @@ import edu.byu.cs.tweeter.model.service.response.AddFollowResponse;
 public class AddFolloweeDAO {
 
     private static Map<User, List<User>> followeesByFollower;
-    public AddFollowResponse AddFollowee (AddFollowRequest request){
+    public AddFollowResponse AddFollowee (AddFollowRequest request) throws Exception {
         assert request.getCurrentUser() != null;
         assert request.getUserToAdd() != null;
         if(followeesByFollower == null) {
@@ -22,18 +22,20 @@ public class AddFolloweeDAO {
         if(followeesByFollower.get(request.getCurrentUser()) == null){
 
             return new AddFollowResponse(false);
+//            throw new Exception("Bad Request: No user exists");
         }
         try{
             followeesByFollower.get(request.getCurrentUser()).add(request.getUserToAdd());
         } catch (Exception e){
-            return new AddFollowResponse(false);
+//            return new AddFollowResponse(false);
+            throw new Exception("Bad Request: No user exists");
         }
 
         int index = followeesByFollower.get(request.getCurrentUser()).indexOf(request.getUserToAdd());
         if(followeesByFollower.get(request.getCurrentUser()).get(index) != null){
             return new AddFollowResponse(true);
         } else {
-            return new AddFollowResponse(false);
+            throw new Exception("Bad Request: No user exists");
         }
     }
 

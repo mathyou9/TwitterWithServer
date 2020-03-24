@@ -11,6 +11,11 @@ public class AddFolloweeHandler implements RequestHandler<AddFollowRequest, AddF
     @Override
     public AddFollowResponse handleRequest(AddFollowRequest addFollowRequest, Context context) {
         AddFolloweeServiceImpl service = new AddFolloweeServiceImpl();
-        return service.addFollowee(addFollowRequest);
+        try {
+            return service.addFollowee(addFollowRequest);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 }

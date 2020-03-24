@@ -9,7 +9,7 @@ import edu.byu.cs.tweeter.server.dao.AddFolloweeDAO;
 
 public class AddFolloweeServiceImpl implements IAddFolloweeService {
     @Override
-    public AddFollowResponse addFollowee(AddFollowRequest request) {
+    public AddFollowResponse addFollowee(AddFollowRequest request) throws Exception {
         AddFolloweeDAO dao = new AddFolloweeDAO();
         return dao.AddFollowee(request);
     }
