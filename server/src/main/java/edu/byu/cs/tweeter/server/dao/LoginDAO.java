@@ -7,7 +7,11 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
+import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
+import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
+import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.service.request.LoginRequest;
@@ -39,6 +43,8 @@ public class LoginDAO {
 
         GetItemSpec spec = new GetItemSpec().withPrimaryKey("alias", request.getEmail());
 
+
+        System.out.println("adding an item: " + request.getEmail());
         Item outcome = null;
         try{
             System.out.println("getting user");
@@ -46,19 +52,34 @@ public class LoginDAO {
         } catch (Exception e){
             System.err.println(e.getMessage());
         }
-
+        System.out.println(outcome);
         if(outcome == null){
             //change to throwing an exception
             return new LoginResponse(null, null);
         }
 
-        PutItemOutcome outcome1 = authTable.putItem(new
-                Item()
-                .withPrimaryKey("alias", request.getEmail())
-                .withString("token", auth)
-        );
+//        PutItemOutcome outcome1 = authTable.putItem(new
+//                Item()
+//                .withPrimaryKey("userAlias", request.getEmail())
+//                .withString("token", auth)
+//        );
+//        System.out.println(outcome1);
+//        if(outcome1 == null){
+//
+//        }
+        UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey("userAlias", request.getEmail())
+                .withUpdateExpression("set token = :t")
+                .withValueMap(new ValueMap().withString(":t", auth))
+                .withReturnValues(ReturnValue.UPDATED_NEW);
 
-        System.out.println("adding an item");
+        try{
+            System.out.println("updating");
+            UpdateItemOutcome outcome1 = authTable.updateItem(updateItemSpec);
+            System.out.println("Updated " + outcome1.getItem().toJSONPretty());
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+
 //        PutItemOutcome outcome = table.putItem(new
 //                Item()
 //                .withPrimaryKey("alias", request.getHandle())
