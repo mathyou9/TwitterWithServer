@@ -61,6 +61,7 @@ public class RegisterDAO {
                 .withString("lastName", request.getLastName())
                 .withString("email", request.getEmail())
                 .withString("password", request.getPassword())
+                .withString("imageUrl", request.getImageUrl())
         );
 
         return new RegisterResponse(currentUser, auth);
