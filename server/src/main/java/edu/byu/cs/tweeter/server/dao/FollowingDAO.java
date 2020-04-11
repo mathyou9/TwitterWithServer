@@ -1,7 +1,18 @@
 package edu.byu.cs.tweeter.server.dao;
 
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.ItemCollection;
+import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
+import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +62,41 @@ public class FollowingDAO {
 
                 hasMorePages = followeesIndex < allFollowees.size();
             }
+        }
+
+        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_WEST_2).build();
+
+        DynamoDB dynamoDB = new DynamoDB(client);
+
+        Table table = dynamoDB.getTable("follows");
+
+//        GetItemSpec spec = new GetItemSpec().withPrimaryKey("follower_handle","@TestUser");
+//
+//        Item outcome = table.getItem(spec);
+//        System.out.println("GotItem " + outcome);
+
+        HashMap<String, String> nameMap = new HashMap<String, String>();
+        nameMap.put("#fhKey", "follower_handle");
+        HashMap<String, Object> valueMap = new HashMap<String, Object>();
+        valueMap.put(":fhVal", "@TestUser");
+
+        QuerySpec querySpec = new QuerySpec()
+                .withKeyConditionExpression("#fhKey = :fhVal")
+                .withNameMap(nameMap)
+                .withValueMap(valueMap)
+                .withScanIndexForward(true);
+        ItemCollection<QueryOutcome> items = null;
+        Iterator<Item> iterator = null;
+        Item item = null;
+
+        items = table.query(querySpec);
+
+        iterator = items.iterator();
+        System.out.println("Printing query:");
+        while (iterator.hasNext()) {
+            item = iterator.next();
+            System.out.println(item.getString("follower_handle"));
+            responseFollowees.add(new User("first", "last", item.getString("follower_handle")));
         }
 
         return new FollowingResponse(responseFollowees, hasMorePages);

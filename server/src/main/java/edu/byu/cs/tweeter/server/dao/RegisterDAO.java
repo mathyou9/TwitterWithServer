@@ -1,5 +1,13 @@
 package edu.byu.cs.tweeter.server.dao;
 
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
+import com.amazonaws.services.dynamodbv2.document.Table;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,17 +35,34 @@ public class RegisterDAO {
         assert request.getHandle() != null;
         assert request.getPassword() != null;
 
-        if(followeesByFollower == null){
-            followeesByFollower = initializeFollowees();
-        }
-        if(followers == null){
-            followers = initializeFollowers();
-        }
+//        if(followeesByFollower == null){
+//            followeesByFollower = initializeFollowees();
+//        }
+//        if(followers == null){
+//            followers = initializeFollowers();
+//        }
+//
+//        currentUser = new User(request.getFirstName(), request.getLastName(), request.getHandle(), request.getImageUrl());
+//
+//
+//        followeesByFollower.put(currentUser, new ArrayList<User>());
 
-        currentUser = new User(request.getFirstName(), request.getLastName(), request.getHandle(), request.getImageUrl());
+        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_WEST_2).build();
 
+        DynamoDB dynamoDB = new DynamoDB(client);
 
-        followeesByFollower.put(currentUser, new ArrayList<User>());
+        Table table = dynamoDB.getTable("users");
+
+        System.out.println("adding an item");
+        PutItemOutcome outcome = table.putItem(new
+                Item()
+                .withPrimaryKey("alias", request.getHandle())
+                .withString("firstName", request.getFirstName())
+                .withString("lastName", request.getLastName())
+                .withString("email", request.getEmail())
+                .withString("password", request.getPassword())
+        );
+
         return new RegisterResponse(currentUser, auth);
 
     }
