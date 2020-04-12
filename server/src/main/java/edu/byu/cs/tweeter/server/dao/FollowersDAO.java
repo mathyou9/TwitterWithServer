@@ -6,6 +6,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Index;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.ItemCollection;
 import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
@@ -24,87 +25,59 @@ import edu.byu.cs.tweeter.model.service.response.FollowersResponse;
 
 public class FollowersDAO {
 
-    private static List<User> followers;
-
     public FollowersResponse getFollowers(FollowersRequest request){
         assert request.getLimit() >= 0;
         assert request.getFollower() != null;
 
-        if(followers == null){
-            followers = initializeFollowers();
-        }
         List<User> responseFollowers = new ArrayList<>(request.getLimit());
 
         boolean hasMorePages = false;
-
-        if(request.getLimit() > 0){
-            if(followers != null){
-                int followersIndex = getFollowersStartingIndex(request.getLastFollower(), followers);
-                for(int limitCounter = 0; followersIndex < followers.size() && limitCounter < request.getLimit(); followersIndex++, limitCounter++){
-                    responseFollowers.add(followers.get(followersIndex));
-                }
-                hasMorePages = followersIndex < followers.size();
-            }
-        }
 
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_WEST_2).build();
 
         DynamoDB dynamoDB = new DynamoDB(client);
 
         Table table = dynamoDB.getTable("follows");
-
-//        GetItemSpec spec = new GetItemSpec().withPrimaryKey("follower_handle","@TestUser");
-//
-//        Item outcome = table.getItem(spec);
-//        System.out.println("GotItem " + outcome);
+        Index index = table.getIndex("follows_index");
+        Table userTable = dynamoDB.getTable("users");
 
         HashMap<String, String> nameMap = new HashMap<String, String>();
-        nameMap.put("#fhKey", "follower_handle");
-        HashMap<String, Object> valueMap = new HashMap<String, Object>();
-        valueMap.put(":fhVal", "@TestUser");
+        nameMap.put("#fhKey", "followee_handle");
 
+        HashMap<String, Object> valueMap = new HashMap<String, Object>();
+        valueMap.put(":fhVal", request.getFollower().getAlias());
+
+        System.out.println(request.getFollower().getAlias());
         QuerySpec querySpec = new QuerySpec()
                 .withKeyConditionExpression("#fhKey = :fhVal")
                 .withNameMap(nameMap)
                 .withValueMap(valueMap)
                 .withScanIndexForward(true);
+
         ItemCollection<QueryOutcome> items = null;
         Iterator<Item> iterator = null;
         Item item = null;
 
-        items = table.query(querySpec);
+        items = index.query(querySpec);
 
         iterator = items.iterator();
         System.out.println("Printing query:");
         while (iterator.hasNext()) {
             item = iterator.next();
             System.out.println(item.getString("follower_handle"));
-            responseFollowers.add(new User("first", "last", item.getString("follower_handle")));
-        }
 
+            GetItemSpec getItemSpec = new GetItemSpec()
+                    .withPrimaryKey("alias", item.getString("follower_handle"));
+            Item outcome = null;
+            try{
+                outcome = userTable.getItem(getItemSpec);
+            } catch (Exception e){
+                System.err.println(e.getMessage());
+            }
+            System.out.println(outcome.getString("alias"));
+
+            responseFollowers.add(new User(outcome.getString("firstName"), outcome.getString("lastName"), outcome.getString("alias"), "https://faculty.cs.byu.edu/~jwilkerson/cs340/tweeter/images/donald_duck.png"));
+        }
         return new FollowersResponse(responseFollowers, hasMorePages);
     }
-
-    private int getFollowersStartingIndex(User lastFollower, List<User> allFollowers){
-        int followeesIndex = 0;
-        if(lastFollower != null){
-            for(int i = 0; i < allFollowers.size(); i++){
-                if(lastFollower.equals(allFollowers.get(i))){
-                    followeesIndex = i + 1;
-                }
-            }
-        }
-        return followeesIndex;
-    }
-
-    private List<User> initializeFollowers(){
-        List<User> users = getFollowGenerator().generateFollowers(50);
-        return users;
-
-    }
-
-    FollowGenerator getFollowGenerator() {
-        return FollowGenerator.getInstance();
-    }
-
 }

@@ -32,7 +32,9 @@ public class GetFollowerTask extends AsyncTask<FollowersRequest, Void, Followers
         FollowersResponse response = null;
         try {
             response = presenter.getFollowers(followersRequests[0]);
-            loadImages(response);
+            if(response != null && response.getFollowers() != null){
+                loadImages(response);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -7,6 +7,7 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,10 +21,6 @@ import edu.byu.cs.tweeter.model.service.response.RegisterResponse;
 
 public class RegisterDAO {
 
-    private static Map<User, List<User>> followeesByFollower;
-
-    private static List<User> followers;
-
     private static User currentUser;
 
     private String auth = "cNdY3D8Gv9ni97rwasRl";
@@ -35,23 +32,12 @@ public class RegisterDAO {
         assert request.getHandle() != null;
         assert request.getPassword() != null;
 
-//        if(followeesByFollower == null){
-//            followeesByFollower = initializeFollowees();
-//        }
-//        if(followers == null){
-//            followers = initializeFollowers();
-//        }
-//
-//        currentUser = new User(request.getFirstName(), request.getLastName(), request.getHandle(), request.getImageUrl());
-//
-//
-//        followeesByFollower.put(currentUser, new ArrayList<User>());
-
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_WEST_2).build();
 
         DynamoDB dynamoDB = new DynamoDB(client);
 
         Table table = dynamoDB.getTable("users");
+        Table authTable = dynamoDB.getTable("authentications");
 
         System.out.println("adding an item");
         PutItemOutcome outcome = table.putItem(new
@@ -64,40 +50,29 @@ public class RegisterDAO {
                 .withString("imageUrl", request.getImageUrl())
         );
 
-        return new RegisterResponse(currentUser, auth);
-
-    }
-
-    private Map<User, List<User>> initializeFollowees() {
-
-        Map<User, List<User>> followeesByFollower = new HashMap<>();
-
-        List<Follow> follows = getFollowGenerator().generateUsersAndFollows(50,
-                0, 50, FollowGenerator.Sort.FOLLOWER_FOLLOWEE);
-
-        // Populate a map of followees, keyed by follower so we can easily handle followee requests
-        for(Follow follow : follows) {
-            List<User> followees = followeesByFollower.get(follow.getFollower());
-
-            if(followees == null) {
-                followees = new ArrayList<>();
-                followeesByFollower.put(follow.getFollower(), followees);
-            }
-
-            followees.add(follow.getFollowee());
+        GetItemSpec getItemSpec = new GetItemSpec()
+                .withPrimaryKey("alias", request.getHandle());
+        try{
+            Item getOutcome = table.getItem(getItemSpec);
+            currentUser = new User(
+                    getOutcome.get("firstName").toString(),
+                    getOutcome.get("lastName").toString(),
+                    getOutcome.get("alias").toString(),
+                    getOutcome.get("imageUrl").toString()
+            );
+        } catch (Exception e){
+            System.err.println(e.getMessage());
         }
 
-        return followeesByFollower;
-    }
 
-    private List<User> initializeFollowers(){
 
-        List<User> users = getFollowGenerator().generateFollowers(50);
-        return users;
+        PutItemOutcome outcome1 = authTable.putItem(new
+                Item()
+                .withPrimaryKey("userAlias", request.getHandle())
+                .withString("authToken", auth)
+        );
 
-    }
+        return new RegisterResponse(currentUser, auth);
 
-    FollowGenerator getFollowGenerator() {
-        return FollowGenerator.getInstance();
     }
 }

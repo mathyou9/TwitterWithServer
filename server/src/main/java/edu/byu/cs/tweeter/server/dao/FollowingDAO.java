@@ -8,6 +8,7 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.ItemCollection;
 import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 
 import java.util.ArrayList;
@@ -43,26 +44,9 @@ public class FollowingDAO {
         assert request.getLimit() > 0;
         assert request.getFollower() != null;
 
-        if(followeesByFollower == null) {
-            followeesByFollower = initializeFollowees();
-        }
-
-        List<User> allFollowees = followeesByFollower.get(request.getFollower());
         List<User> responseFollowees = new ArrayList<>(request.getLimit());
 
         boolean hasMorePages = false;
-
-        if(request.getLimit() > 0) {
-            if (allFollowees != null) {
-                int followeesIndex = getFolloweesStartingIndex(request.getLastFollowee(), allFollowees);
-
-                for(int limitCounter = 0; followeesIndex < allFollowees.size() && limitCounter < request.getLimit(); followeesIndex++, limitCounter++) {
-                    responseFollowees.add(allFollowees.get(followeesIndex));
-                }
-
-                hasMorePages = followeesIndex < allFollowees.size();
-            }
-        }
 
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_WEST_2).build();
 
@@ -70,15 +54,17 @@ public class FollowingDAO {
 
         Table table = dynamoDB.getTable("follows");
 
+        Table userTable = dynamoDB.getTable("users");
+
 //        GetItemSpec spec = new GetItemSpec().withPrimaryKey("follower_handle","@TestUser");
 //
 //        Item outcome = table.getItem(spec);
 //        System.out.println("GotItem " + outcome);
-
+        System.out.println(request.getFollower().getAlias());
         HashMap<String, String> nameMap = new HashMap<String, String>();
         nameMap.put("#fhKey", "follower_handle");
         HashMap<String, Object> valueMap = new HashMap<String, Object>();
-        valueMap.put(":fhVal", "@TestUser");
+        valueMap.put(":fhVal", request.getFollower().getAlias());
 
         QuerySpec querySpec = new QuerySpec()
                 .withKeyConditionExpression("#fhKey = :fhVal")
@@ -96,7 +82,17 @@ public class FollowingDAO {
         while (iterator.hasNext()) {
             item = iterator.next();
             System.out.println(item.getString("follower_handle"));
-            responseFollowees.add(new User("first", "last", item.getString("follower_handle")));
+
+            GetItemSpec getItemSpec = new GetItemSpec()
+                    .withPrimaryKey("alias", item.getString("followee_handle"));
+            Item outcome = null;
+            try{
+                outcome = userTable.getItem(getItemSpec);
+            } catch (Exception e){
+                System.err.println(e.getMessage());
+            }
+
+            responseFollowees.add(new User(outcome.getString("firstName"), outcome.getString("lastName"), outcome.getString("alias"), "https://faculty.cs.byu.edu/~jwilkerson/cs340/tweeter/images/donald_duck.png"));
         }
 
         return new FollowingResponse(responseFollowees, hasMorePages);

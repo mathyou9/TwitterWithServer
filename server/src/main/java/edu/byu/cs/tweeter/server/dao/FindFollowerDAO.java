@@ -1,5 +1,13 @@
 package edu.byu.cs.tweeter.server.dao;
 
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,46 +26,26 @@ public class FindFollowerDAO {
         assert request.getCurrentUser() != null;
         assert request.getUserBeingFollowed() != null;
 
-        if(followeesByFollower == null) {
-            followeesByFollower = initializeFollowees();
+        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_WEST_2).build();
+
+        DynamoDB dynamoDB = new DynamoDB(client);
+
+        Table followsTable = dynamoDB.getTable("follows");
+
+        GetItemSpec spec = new GetItemSpec().withPrimaryKey("follower_handle", request.getUserBeingFollowed().getAlias(), "followee_handle", request.getCurrentUser().getAlias());
+        Item outcome = null;
+        System.out.println(request.getCurrentUser().getAlias());
+        System.out.println(request.getUserBeingFollowed().getAlias());
+        try {
+            outcome = followsTable.getItem(spec);
+        } catch (Exception e){
+            System.err.println(e.getMessage());
         }
-        if(followeesByFollower.get(request.getCurrentUser()) == null){
+
+
+        if(outcome == null){
             return new FindFollowerResponse(false);
         }
-        followeesByFollower.get(request.getCurrentUser()).add(new User("Daffy", "Duck", ""));
-        for(User user : followeesByFollower.get(request.getCurrentUser())){
-            if(user.getAlias().equals(request.getUserBeingFollowed().getAlias())){
-                return new FindFollowerResponse(true);
-            }
-        }
-
-
-        return new FindFollowerResponse(false);
-    }
-
-    private Map<User, List<User>> initializeFollowees() {
-
-        Map<User, List<User>> followeesByFollower = new HashMap<>();
-
-        List<Follow> follows = getFollowGenerator().generateUsersAndFollows(50,
-                0, 50, FollowGenerator.Sort.FOLLOWER_FOLLOWEE);
-
-        // Populate a map of followees, keyed by follower so we can easily handle followee requests
-        for(Follow follow : follows) {
-            List<User> followees = followeesByFollower.get(follow.getFollower());
-
-            if(followees == null) {
-                followees = new ArrayList<>();
-                followeesByFollower.put(follow.getFollower(), followees);
-            }
-
-            followees.add(follow.getFollowee());
-        }
-
-        return followeesByFollower;
-    }
-
-    FollowGenerator getFollowGenerator() {
-        return FollowGenerator.getInstance();
+        return new FindFollowerResponse(true);
     }
 }
