@@ -1,10 +1,13 @@
 package edu.byu.cs.tweeter.client.view.main.Login;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +17,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
+
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 import edu.byu.cs.tweeter.R;
 import edu.byu.cs.tweeter.client.presenter.RegisterPresenter;
@@ -46,7 +53,13 @@ public class RegisterContinueFragment extends Fragment implements RegisterPresen
         signUpButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RegisterTask registerTask = new RegisterTask(presenter, getActivity());
+                Bitmap bitmap = ((BitmapDrawable)photo.getDrawable()).getBitmap();
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 10, stream);
+                byte[] byteArray = stream.toByteArray();
+                String imageString = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                imageString = imageString.replace("\n","");
+                RegisterTask registerTask = new RegisterTask(presenter, getActivity(), imageString);
                 RegisterRequest request = new RegisterRequest(presenter.email, presenter.password,firstName.getText().toString(),lastName.getText().toString(),handle.getText().toString(), imageUrl);
                 registerTask.execute(request);
 //                Fragment fragment = getFragmentManager().findFragmentById(R.id.view_pager);

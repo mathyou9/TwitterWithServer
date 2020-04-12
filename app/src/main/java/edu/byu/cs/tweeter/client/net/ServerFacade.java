@@ -1,6 +1,11 @@
 package edu.byu.cs.tweeter.client.net;
 
+import android.os.FileUtils;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Base64;
 
 import edu.byu.cs.tweeter.model.service.request.AddFollowRequest;
 import edu.byu.cs.tweeter.model.service.request.CreateTweetRequest;
@@ -13,6 +18,7 @@ import edu.byu.cs.tweeter.model.service.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.service.request.ProfileRequest;
 import edu.byu.cs.tweeter.model.service.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.service.request.RemoveRequest;
+import edu.byu.cs.tweeter.model.service.request.SaveImageRequest;
 import edu.byu.cs.tweeter.model.service.request.StoryRequest;
 import edu.byu.cs.tweeter.model.service.response.AddFollowResponse;
 import edu.byu.cs.tweeter.model.service.response.CreateTweetResponse;
@@ -25,6 +31,7 @@ import edu.byu.cs.tweeter.model.service.response.LogoutResponse;
 import edu.byu.cs.tweeter.model.service.response.ProfileResponse;
 import edu.byu.cs.tweeter.model.service.response.RegisterResponse;
 import edu.byu.cs.tweeter.model.service.response.RemoveResponse;
+import edu.byu.cs.tweeter.model.service.response.SaveImageResponse;
 import edu.byu.cs.tweeter.model.service.response.StoryResponse;
 
 /**
@@ -103,7 +110,13 @@ public class ServerFacade {
 
     public RegisterResponse register(RegisterRequest request, String urlPath) throws IOException {
         ClientCommunicator clientCommunicator = new ClientCommunicator(SERVER_URL);
+
         return clientCommunicator.doPost(urlPath, request, null, RegisterResponse.class);
+    }
+
+    public SaveImageResponse saveImage(SaveImageRequest request, String urlPath) throws  IOException{
+        ClientCommunicator clientCommunicator = new ClientCommunicator(SERVER_URL);
+        return clientCommunicator.doPost(urlPath, request, null, SaveImageResponse.class);
     }
 
     public StoryResponse getStoryTweets(StoryRequest request, String urlPath) throws IOException {
