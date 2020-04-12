@@ -34,7 +34,9 @@ public class LoginTask extends AsyncTask<LoginRequest, Void, LoginResponse> {
 
     @Override
     protected void onPostExecute(LoginResponse response){
-        Intent intent = new Intent(activity, MainLoggedInActivity.class);
-        activity.startActivity(intent);
+        if(response.getMessage() == null){
+            Intent intent = new Intent(activity, MainLoggedInActivity.class);
+            activity.startActivity(intent);
+        }
     }
 }

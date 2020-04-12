@@ -67,7 +67,9 @@ public class LoginService {
 
     public LoginResponse login(LoginRequest request) throws IOException {
         LoginResponse loginResponse = serverFacade.login(request, URL_PATH);
-        currentUser = loginResponse.getCurrentUser();
+        if(loginResponse.getMessage() == null){
+            currentUser = loginResponse.getCurrentUser();
+        }
         return  loginResponse;
     }
 }

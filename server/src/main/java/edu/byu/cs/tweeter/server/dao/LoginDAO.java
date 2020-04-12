@@ -43,10 +43,11 @@ public class LoginDAO {
             System.err.println(e.getMessage());
         }
 
-
         if(outcome == null){
-            //change to throwing an exception
-            return new LoginResponse(null, null);
+            return new LoginResponse("Error: No User");
+        }
+        if(!outcome.getString("password").equals(request.getPassword())){
+            return new LoginResponse("Error: Invalid Login");
         }
 
         UpdateItemSpec updateItemSpec = new UpdateItemSpec()
@@ -54,16 +55,19 @@ public class LoginDAO {
                 .withUpdateExpression("set authToken = :t")
                 .withValueMap(new ValueMap().withString(":t", auth))
                 .withReturnValues(ReturnValue.UPDATED_NEW);
-
+        UpdateItemOutcome outcome1 = null;
         try{
             System.out.println("updating");
-            UpdateItemOutcome outcome1 = authTable.updateItem(updateItemSpec);
+            outcome1 = authTable.updateItem(updateItemSpec);
             System.out.println("Updated " + outcome1.getItem().toJSONPretty());
         } catch (Exception e){
             System.out.println(e.getMessage());
         }
-        currentUser = new User(outcome.get("firstName").toString(), outcome.get("lastName").toString(), outcome.get("alias").toString(), outcome.get("imageUrl").toString());
+        if(outcome1 == null){
+            return new LoginResponse("Error: Server Error");
+        }
 
+        currentUser = new User(outcome.get("firstName").toString(), outcome.get("lastName").toString(), outcome.get("alias").toString(), outcome.get("imageUrl").toString());
 
         return new LoginResponse(currentUser, auth);
 
