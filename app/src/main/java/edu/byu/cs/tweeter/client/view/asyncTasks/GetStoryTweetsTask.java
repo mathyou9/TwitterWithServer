@@ -42,14 +42,16 @@ public class GetStoryTweetsTask extends AsyncTask<StoryRequest, Void, StoryRespo
     private void loadImages (StoryResponse response){
         for(Tweet tweet : response.getStory()){
             Drawable drawable;
-
-            try{
-                drawable = ImageUtils.drawableFromUrl(tweet.getUserCreated().getImageUrl());
-            } catch (IOException e){
-                Log.e(this.getClass().getName(), e.toString(), e);
-                drawable = null;
+            if(tweet.getUserCreated().getImageUrl() != null){
+                try{
+                    drawable = ImageUtils.drawableFromUrl(tweet.getUserCreated().getImageUrl());
+                } catch (IOException e){
+                    Log.e(this.getClass().getName(), e.toString(), e);
+                    drawable = null;
+                }
+                ImageCache.getInstance().cacheImage(tweet.getUserCreated(), drawable);
             }
-            ImageCache.getInstance().cacheImage(tweet.getUserCreated(), drawable);
+
         }
     }
 

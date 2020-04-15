@@ -51,7 +51,13 @@ public class StoryDAO {
                 .withKeyConditionExpression("#key = :val")
                 .withNameMap(nameMap)
                 .withValueMap(valueMap)
-                .withScanIndexForward(true);
+                .withScanIndexForward(true)
+                .withMaxResultSize(request.getLimit());
+        if(request.getLastTweet() != null){
+            querySpec = querySpec
+                    .withExclusiveStartKey("userAlias", request.getUser().getAlias(), "tweetID", request.getLastTweet().getTweetID());
+            //probably need sort key
+        }
         ItemCollection<QueryOutcome> items = null;
         Iterator<Item> iterator = null;
         Item item = null;
@@ -63,8 +69,16 @@ public class StoryDAO {
         while (iterator.hasNext()) {
             item = iterator.next();
             System.out.println("item " + item);
-
-            responseTweets.add(new Tweet(request.getUser(), item.getString("message"), item.getString("dateCreated")));
+            Tweet tweet = new Tweet(
+                    request.getUser(),
+                    item.getString("message"),
+                    item.getString("dateCreated")
+            );
+            tweet.setTweetID(item.getString("tweetID"));
+            responseTweets.add(tweet);
+        }
+        if(items.getLastLowLevelResult().getQueryResult().getLastEvaluatedKey() == null){
+            hasMorePages = false;
         }
 
         return new StoryResponse(responseTweets, hasMorePages);

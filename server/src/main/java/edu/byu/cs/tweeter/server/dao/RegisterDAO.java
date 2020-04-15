@@ -9,10 +9,13 @@ import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import edu.byu.cs.tweeter.model.domain.Follow;
 import edu.byu.cs.tweeter.model.domain.User;
@@ -23,7 +26,7 @@ public class RegisterDAO {
 
     private static User currentUser;
 
-    private String auth = "cNdY3D8Gv9ni97rwasRl";
+//    private String auth = "cNdY3D8Gv9ni97rwasRl";
 
     public RegisterResponse registerUser(RegisterRequest request){
         assert request.getEmail() != null;
@@ -40,13 +43,15 @@ public class RegisterDAO {
         Table authTable = dynamoDB.getTable("authentications");
 
         System.out.println("adding an item");
+        String password = BCrypt.hashpw(request.getPassword(), BCrypt.gensalt());
+        System.out.println(password);
         PutItemOutcome outcome = table.putItem(new
                 Item()
                 .withPrimaryKey("alias", request.getHandle())
                 .withString("firstName", request.getFirstName())
                 .withString("lastName", request.getLastName())
                 .withString("email", request.getEmail())
-                .withString("password", request.getPassword())
+                .withString("password", password)
                 .withString("imageUrl", request.getImageUrl())
         );
 
@@ -65,7 +70,7 @@ public class RegisterDAO {
         }
 
 
-
+        String auth = UUID.randomUUID().toString();
         PutItemOutcome outcome1 = authTable.putItem(new
                 Item()
                 .withPrimaryKey("userAlias", request.getHandle())

@@ -10,6 +10,9 @@ dependencies {
     testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
     // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-dynamodb
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.547'
+    // https://mvnrepository.com/artifact/org.mindrot/jbcrypt
+    implementation group: 'org.mindrot', name: 'jbcrypt', version: '0.3m'
+
 
 }
 

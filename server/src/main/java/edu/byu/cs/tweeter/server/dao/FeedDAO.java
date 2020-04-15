@@ -65,6 +65,9 @@ public class FeedDAO {
             System.out.println(item.getString("message"));
             responseTweets.add(new Tweet(request.getUser(), "hello", LocalDateTime.now().format(dateTimeFormatter).toString()));
         }
+        if(items.getLastLowLevelResult().getQueryResult().getLastEvaluatedKey() == null){
+            hasMorePages = false;
+        }
 
         return new FeedResponse(responseTweets, hasMorePages);
     }

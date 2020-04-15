@@ -46,7 +46,7 @@ public class FollowingDAO {
 
         List<User> responseFollowees = new ArrayList<>(request.getLimit());
 
-        boolean hasMorePages = false;
+        boolean hasMorePages = true;
 
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_WEST_2).build();
 
@@ -70,7 +70,12 @@ public class FollowingDAO {
                 .withKeyConditionExpression("#fhKey = :fhVal")
                 .withNameMap(nameMap)
                 .withValueMap(valueMap)
-                .withScanIndexForward(true);
+                .withScanIndexForward(true)
+                .withMaxResultSize(request.getLimit());
+        if(request.getLastFollowee() != null){
+            querySpec = querySpec
+                    .withExclusiveStartKey("follower_handle", request.getFollower().getAlias(), "followee_handle", request.getLastFollowee().getAlias());
+        }
         ItemCollection<QueryOutcome> items = null;
         Iterator<Item> iterator = null;
         Item item = null;
@@ -82,6 +87,7 @@ public class FollowingDAO {
         while (iterator.hasNext()) {
             item = iterator.next();
             System.out.println(item.getString("follower_handle"));
+            System.out.println(item.getString("followee_handle"));
 
             GetItemSpec getItemSpec = new GetItemSpec()
                     .withPrimaryKey("alias", item.getString("followee_handle"));
@@ -93,6 +99,9 @@ public class FollowingDAO {
             }
 
             responseFollowees.add(new User(outcome.getString("firstName"), outcome.getString("lastName"), outcome.getString("alias"), "https://faculty.cs.byu.edu/~jwilkerson/cs340/tweeter/images/donald_duck.png"));
+        }
+        if(items.getLastLowLevelResult().getQueryResult().getLastEvaluatedKey() == null){
+            hasMorePages = false;
         }
 
         return new FollowingResponse(responseFollowees, hasMorePages);

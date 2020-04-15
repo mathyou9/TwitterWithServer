@@ -13,6 +13,10 @@ import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 
+import org.mindrot.jbcrypt.BCrypt;
+
+import java.util.UUID;
+
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.service.request.LoginRequest;
 import edu.byu.cs.tweeter.model.service.response.LoginResponse;
@@ -21,7 +25,7 @@ public class LoginDAO {
 
     private static User currentUser;
 
-    private String auth = "cNdY3D8Gv9ni97rwasRl";
+//    private String auth = "cNdY3D8Gv9ni97rwasRl";
 
     public LoginResponse loginUser(LoginRequest request){
         assert request.getEmail() != null;
@@ -46,10 +50,11 @@ public class LoginDAO {
         if(outcome == null){
             return new LoginResponse("Error: No User");
         }
-        if(!outcome.getString("password").equals(request.getPassword())){
+
+        if(!BCrypt.checkpw(request.getPassword(), outcome.getString("password"))){
             return new LoginResponse("Error: Invalid Login");
         }
-
+        String auth = UUID.randomUUID().toString();
         UpdateItemSpec updateItemSpec = new UpdateItemSpec()
                 .withPrimaryKey("userAlias", request.getEmail())
                 .withUpdateExpression("set authToken = :t")

@@ -8,6 +8,7 @@ public class Tweet {
     User userCreated;
     String imageUrl;
     String date;
+    String tweetID;
 
     public Tweet(){}
     public Tweet(User userCreated, String message, String date){
@@ -37,5 +38,13 @@ public class Tweet {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public void setTweetID(String tweetID) {
+        this.tweetID = tweetID;
+    }
+
+    public String getTweetID() {
+        return tweetID;
     }
 }
