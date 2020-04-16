@@ -8,7 +8,12 @@ import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import com.amazonaws.services.sqs.model.SendMessageRequest;
+import com.amazonaws.services.sqs.model.SendMessageResult;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.google.gson.Gson;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -69,6 +74,19 @@ public class CreateTweetDAO {
         if(message == null || userAlias == null){
             return new CreateTweetResponse(null,null);
         }
+        Tweet tweet = new Tweet(request.getUser(), request.getMessage(), LocalDateTime.now().format(dateTimeFormatter).toString());
+        tweet.setTweetID(uuid);
+        String messageBody = (new Gson()).toJson(tweet);
+        System.out.println(messageBody);
+        String queueUrl = "https://sqs.us-west-2.amazonaws.com/528184139160/PostStatus";
+        SendMessageRequest send_msg_request = new SendMessageRequest()
+                .withQueueUrl(queueUrl)
+                .withMessageBody(messageBody)
+                .withDelaySeconds(5);
+        AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
+        SendMessageResult send_msg_result = sqs.sendMessage(send_msg_request);
+        String msgId = send_msg_result.getMessageId();
+        System.out.println("Message ID: " + msgId);
         return new CreateTweetResponse(request.getUser(), message);
     }
 

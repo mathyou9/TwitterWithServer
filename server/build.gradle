@@ -12,6 +12,11 @@ dependencies {
     implementation group: 'com.amazonaws', name: 'aws-java-sdk-dynamodb', version: '1.11.547'
     // https://mvnrepository.com/artifact/org.mindrot/jbcrypt
     implementation group: 'org.mindrot', name: 'jbcrypt', version: '0.3m'
+    // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-sqs
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-sqs', version: '1.11.762'
+    // https://mvnrepository.com/artifact/com.amazonaws/aws-lambda-java-events
+    implementation group: 'com.amazonaws', name: 'aws-lambda-java-events', version: '2.2.7'
+
 
 
 }

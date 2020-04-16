@@ -38,11 +38,11 @@ public class FeedDAO {
 
         DynamoDB dynamoDB = new DynamoDB(client);
 
-        Table table = dynamoDB.getTable("feed");
+        Table table = dynamoDB.getTable("feeds");
 
         System.out.println(request.getUser().getAlias());
         HashMap<String, String> nameMap = new HashMap<String, String>();
-        nameMap.put("#key", "userFeedAlias");
+        nameMap.put("#key", "usersFeedAlias");
         HashMap<String, Object> valueMap = new HashMap<String, Object>();
         valueMap.put(":val", request.getUser().getAlias());
 

@@ -62,6 +62,7 @@ public class LoginService {
     }
 
     public void setCurrentUser(User currentUser) {
+        ProfileService.getInstance().setSelectedUser(currentUser);
         this.currentUser = currentUser;
     }
 
